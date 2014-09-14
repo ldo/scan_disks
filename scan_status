@@ -1,0 +1,31 @@
+#!/bin/bash
+#+
+# This script looks for currently-running badblocks processes, and reports
+# how far along they are in their scans.
+#
+# Note this does not take account of multipass scans; it only reports progress
+# on the current (or only) pass.
+#
+# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Licensed under Creative Commons CC0
+# <https://creativecommons.org/publicdomain/zero/1.0/>.
+#-
+
+badblocks_exe="$(type -p badblocks)"
+if [ -z "$badblocks_exe" ]; then
+    echo "cannot find badblocks in your \$PATH." 1>&2
+    exit 3
+fi
+disk_fd=3 # badblocks always opens disk on this file descriptor
+
+for procdir in /proc/[0-9]*; do
+    if [ "$(readlink "${procdir}"/exe)" = "$badblocks_exe" ]; then
+        echo "readlink "${procdir}"/fd/${disk_fd}"
+        disk="$(readlink "${procdir}"/fd/${disk_fd})"
+        pos="$(perl -lne '/pos:\s+(\d+)/ && print $1' <"${procdir}/fdinfo/${disk_fd}")"
+        size="$(cat /sys/block/${disk##*/}/size)"
+        echo -n "proc ${procdir##*/} disk $disk pos $pos/($size * 512) = "
+        bc <<<"print $pos * 100 / ($size * 512)"
+        echo "%"
+    fi
+done
