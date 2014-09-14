@@ -19,6 +19,7 @@ fi
 disk_fd=3 # badblocks always opens disk on this file descriptor
 clock_ticks=$(getconf CLK_TCK)
 
+did_one=
 for procdir in /proc/[0-9]*; do
     if [ "$(readlink "${procdir}"/exe)" = "$badblocks_exe" ]; then
         disk="$(readlink "${procdir}"/fd/${disk_fd})"
@@ -31,5 +32,9 @@ for procdir in /proc/[0-9]*; do
         echo -n "% in "
         bc <<<"print ($now - $starttime) / $clock_ticks"
         echo " seconds"
+        did_one=1
     fi
 done
+if [ ! $did_one ]; then
+    echo "No badblocks processes found."
+fi

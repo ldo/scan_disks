@@ -18,12 +18,18 @@
 # <https://creativecommons.org/publicdomain/zero/1.0/>.
 #-
 
+did_one=
 for dev in /dev/[hs]d?; do
     name="${dev##*/}"
     if [ $(cat /sys/block/$name/removable) == "0" ]; then
+        echo "start scan on $dev"
         # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
         # Ah, turns it’s not a bug, it’s a feature
         # <http://stackoverflow.com/questions/9677306/linux-command-setsid>
         ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
+        did_one=1
     fi
 done
+if [ ! $did_one ]; then
+    echo 'No disks found!?'
+fi
