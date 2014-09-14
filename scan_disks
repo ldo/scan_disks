@@ -2,7 +2,7 @@
 #+
 # This script runs background bad-sector scans on all your block
 # devices. Invoke it without arguments, and it will look for all
-# devices named /dev/hd?  and /dev/sd?, and start a read-only scan for
+# devices named /dev/hd? and /dev/sd?, and start a read-only scan for
 # each, with a corresponding logfile named badblocks_<devname>.log in
 # the current directory. Check these logfiles for results at the
 # completion of the scans; if they contain only timing information,
