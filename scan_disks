@@ -1,0 +1,24 @@
+#!/bin/bash
+#+
+# This script runs background bad-sector scans on all your block
+# devices. Invoke it without arguments, and it will look for all
+# devices named /dev/hd?  and /dev/sd?, and start a read-only scan for
+# each, with a corresponding logfile named badblocks_<devname>.log in
+# the current directory. Check these logfiles for results at the
+# completion of the scans; if they contain only timing information,
+# then all is well. But if this is preceded by lines containing
+# integer sector numbers, then badblocks had trouble reading those
+# sectors.
+#
+# The scan processes are given the lowest-possible I/O priority to
+# minimize impact on regular use of the system at the same time.
+#
+# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Licensed under Creative Commons CC0
+# <https://creativecommons.org/publicdomain/zero/1.0/>.
+#-
+
+for dev in /dev/[hs]d?; do
+    name="${dev##*/}"
+    ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log
+done
