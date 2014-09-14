@@ -21,7 +21,6 @@ clock_ticks=$(getconf CLK_TCK)
 
 for procdir in /proc/[0-9]*; do
     if [ "$(readlink "${procdir}"/exe)" = "$badblocks_exe" ]; then
-        echo "readlink "${procdir}"/fd/${disk_fd}"
         disk="$(readlink "${procdir}"/fd/${disk_fd})"
         pos="$(perl -lne '/pos:\s+(\d+)/ && print $1' <"${procdir}/fdinfo/${disk_fd}")"
         size="$(cat /sys/block/${disk##*/}/size)"
