@@ -20,5 +20,6 @@
 
 for dev in /dev/[hs]d?; do
     name="${dev##*/}"
-    ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log
+    # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
+    ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
 done
