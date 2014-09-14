@@ -27,6 +27,7 @@ for procdir in /proc/[0-9]*; do
         size="$(cat /sys/block/${disk##*/}/size)"
         starttime="$(perl -lne '@_ = split(/\s+/); print $_[21]' <"${procdir}/stat")"
         now="$(perl -lne '@_ = split(/\s+/); print $_[21]' <"/proc/self/stat")"
+          # not strictly accurate, but good enough
         echo -n "proc ${procdir##*/} disk $disk pos $pos/($size * 512) = "
         bc <<<"print $pos * 100 / ($size * 512)"
         echo -n "% in "
