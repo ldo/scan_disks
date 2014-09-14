@@ -21,5 +21,7 @@
 for dev in /dev/[hs]d?; do
     name="${dev##*/}"
     # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
+    # Ah, turns it’s not a bug, it’s a feature
+    # <http://stackoverflow.com/questions/9677306/linux-command-setsid>
     ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
 done
