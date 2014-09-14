@@ -17,6 +17,7 @@ if [ -z "$badblocks_exe" ]; then
     exit 3
 fi
 disk_fd=3 # badblocks always opens disk on this file descriptor
+clock_ticks=$(getconf CLK_TCK)
 
 for procdir in /proc/[0-9]*; do
     if [ "$(readlink "${procdir}"/exe)" = "$badblocks_exe" ]; then
@@ -24,8 +25,12 @@ for procdir in /proc/[0-9]*; do
         disk="$(readlink "${procdir}"/fd/${disk_fd})"
         pos="$(perl -lne '/pos:\s+(\d+)/ && print $1' <"${procdir}/fdinfo/${disk_fd}")"
         size="$(cat /sys/block/${disk##*/}/size)"
+        starttime="$(perl -lne '@_ = split(/\s+/); print $_[21]' <"${procdir}/stat")"
+        now="$(perl -lne '@_ = split(/\s+/); print $_[21]' <"/proc/self/stat")"
         echo -n "proc ${procdir##*/} disk $disk pos $pos/($size * 512) = "
         bc <<<"print $pos * 100 / ($size * 512)"
-        echo "%"
+        echo -n "% in "
+        bc <<<"print ($now - $starttime) / $clock_ticks"
+        echo " seconds"
     fi
 done
