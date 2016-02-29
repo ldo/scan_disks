@@ -1,33 +1,45 @@
 #!/bin/bash
 #+
-# This script runs background bad-sector scans on all your block
-# devices. Invoke it without arguments, and it will look for all
-# devices named /dev/hd? and /dev/sd?, and start a read-only scan for
-# each, with a corresponding logfile named badblocks_<devname>.log in
-# the current directory. Check these logfiles for results at the
-# completion of the scans; if they contain only timing information,
-# then all is well. But if this is preceded by lines containing
-# integer sector numbers, then badblocks had trouble reading those
-# sectors.
+# This script runs background bad-sector scans on your block devices.
+# Invoke it without arguments, and it will look for all devices named
+# /dev/hd? and /dev/sd?, and start a read-only scan for each.
+# Alternatively, invoke it with an argument which is the full
+# pathname of a device file of one of the above forms, and it will
+# start a scan on just that disk.
+# The output from a scan of <devname> will be written to a logfile
+# named badblocks_<devname>.log in the current directory. Check these
+# logfiles for results at the completion of the scans; if they
+# contain only timing information, then all is well. But if this
+# is preceded by lines containing integer sector numbers, then
+# badblocks had trouble reading those sectors.
 #
 # The scan processes are given the lowest-possible I/O priority to
 # minimize impact on regular use of the system at the same time.
 #
-# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2014, 2016 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under Creative Commons CC0
 # <https://creativecommons.org/publicdomain/zero/1.0/>.
 #-
 
+only_disk=
+if [ "$#" = 1 ]; then
+    only_disk="$1"
+elif [ "$#" != 0 ]; then
+    echo "$0: Expecting only one optional argument"
+    exit 1
+fi
 did_one=
 for dev in /dev/[hs]d?; do
     name="${dev##*/}"
     if [ $(cat /sys/block/$name/removable) == "0" ]; then
-        echo "start scan on $dev"
-        # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
-        # Ah, turns it’s not a bug, it’s a feature
-        # <http://stackoverflow.com/questions/9677306/linux-command-setsid>
-        ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
-        did_one=1
+        if [ -z "$only_disk" -o "$only_disk" = "$dev" ]; then
+            echo "start scan on $dev"
+            # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
+            # Ah, turns out it’s not a bug, it’s a feature
+            # <http://stackoverflow.com/questions/9677306/linux-command-setsid>
+            ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
+            did_one=1
+        fi
     fi
 done
 if [ ! $did_one ]; then
