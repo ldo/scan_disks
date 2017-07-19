@@ -16,7 +16,7 @@
 # The scan processes are given the lowest-possible I/O priority to
 # minimize impact on regular use of the system at the same time.
 #
-# Copyright 2014, 2016 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2014-2017 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under Creative Commons CC0
 # <https://creativecommons.org/publicdomain/zero/1.0/>.
 #-
@@ -33,11 +33,12 @@ for dev in /dev/[hs]d?; do
     name="${dev##*/}"
     if [ $(cat /sys/block/$name/removable) == "0" ]; then
         if [ -z "$only_disk" -o "$only_disk" = "$dev" ]; then
+            blocksize=$(cat /sys/block/$(basename "$dev")/queue/physical_block_size)
             echo "start scan on $dev"
             # I don't know why the “&” is needed on the end of this ... isn’t the setsid enough?
             # Ah, turns out it’s not a bug, it’s a feature
             # <http://stackoverflow.com/questions/9677306/linux-command-setsid>
-            ionice -c3 setsid time badblocks "$dev" </dev/null >&badblocks_"${name}".log &
+            ionice -c3 setsid time badblocks -b"$blocksize" "$dev" </dev/null >&badblocks_"${name}".log &
             did_one=1
         fi
     fi
