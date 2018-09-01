@@ -6,6 +6,8 @@
 # Note this does not take account of multipass scans; it only reports progress
 # on the current (or only) pass.
 #
+# External package needed: bc.
+#
 # Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under Creative Commons CC0
 # <https://creativecommons.org/publicdomain/zero/1.0/>.

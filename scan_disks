@@ -16,6 +16,8 @@
 # The scan processes are given the lowest-possible I/O priority to
 # minimize impact on regular use of the system at the same time.
 #
+# External package needed: e2fsprogs, time.
+#
 # Copyright 2014-2017 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under Creative Commons CC0
 # <https://creativecommons.org/publicdomain/zero/1.0/>.
